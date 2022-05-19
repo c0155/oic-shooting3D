@@ -10,12 +10,18 @@
 //INCLUDE
 #include	"GameApp.h"
 #include	"Player.h"
+#include	"Stage.h"
 
 CCamera				gcamera;
 CDirectionalLight	glight;
 CPlayer				gplayer;
+CStage				gStage;
 //デバッグ表示フラグ
 bool				gddebug;
+
+CVector3			gCPos;
+CVector3			gTPos;
+CVector3			gUVec;
 
 /*************************************************************************//*!
 		@brief			アプリケーションの初期化
@@ -36,16 +42,24 @@ MofBool CGameApp::Initialize(void){
 
 	//ライト初期化
 	glight.SetDirection(Vector3(-1, -2, 1.5f));
-	glight.SetDiffuse(MOF_COLOR_WHITE);
+	glight.SetDiffuse(MOF_COLOR_BLUE);
 	glight.SetAmbient(MOF_COLOR_HWHITE);
 	glight.SetSpeculer(MOF_COLOR_WHITE);
 	CGraphicsUtilities::SetDirectionalLight(&glight);
 
+
+
 	//プレイヤーの素材読み込み
 	gplayer.Load();
 
+	//ステージ
+	gStage.Load();
+
 	//プレイヤーの初期化
 	gplayer.Initialize();
+
+	//ステージ初期化
+	gStage.Initialize();
 	
 	return TRUE;
 }
@@ -59,6 +73,8 @@ MofBool CGameApp::Initialize(void){
 MofBool CGameApp::Update(void){
 	//キーの更新
 	g_pInput->RefreshKey();
+	//ステージ更新
+	gStage.Update();
 
 	//プレイヤーの更新
 	gplayer.Update();
@@ -75,6 +91,7 @@ MofBool CGameApp::Update(void){
 	CVector3 vup = Vector3(0, 1, 0);
 	cpos.x = posx;
 	tpos.x = posx;
+	vup.RotationZ(gplayer.GetPosition().x / FIELD_HALF_X * MOF_ToRadian(10.0f));
 	gcamera.LookAt(cpos, tpos, vup);
 	gcamera.Update();
 	return TRUE;
@@ -95,6 +112,8 @@ MofBool CGameApp::Render(void){
 
 	g_pGraphics->SetDepthEnable(TRUE);
 
+	gStage.Render();
+
 	gplayer.Render();
 
 	if (gddebug)
@@ -108,9 +127,12 @@ MofBool CGameApp::Render(void){
 
 	if (gddebug)
 	{
+		//デバッグ文字
 		gplayer.RenderDebugText();
-	}
+		gStage.RenderDebugText();
 
+	}
+	
 	// 描画の終了
 	g_pGraphics->RenderEnd();
 	return TRUE;
@@ -124,5 +146,6 @@ MofBool CGameApp::Render(void){
 *//**************************************************************************/
 MofBool CGameApp::Release(void){
 	gplayer.Release();
+	gStage.Release();
 	return TRUE;
 }
