@@ -11,10 +11,13 @@
 #include	"GameApp.h"
 #include	"Player.h"
 #include	"Stage.h"
+#include	"Stage1.h"
 
 CCamera				gcamera;
 CDirectionalLight	glight;
 CPlayer				gplayer;
+#define				ENEMY_COUNT			(20)
+CEnemy				gEnemyArray[ENEMY_COUNT];
 CStage				gStage;
 //デバッグ表示フラグ
 bool				gddebug;
@@ -59,7 +62,13 @@ MofBool CGameApp::Initialize(void){
 	gplayer.Initialize();
 
 	//ステージ初期化
-	gStage.Initialize();
+	gStage.Initialize(&gStg1EnemyStart);
+
+	//敵初期化
+	for (int i = 0; i < ENEMY_COUNT; i++)
+	{
+		gEnemyArray[i].Initialize();
+	}
 	
 	return TRUE;
 }
@@ -74,10 +83,15 @@ MofBool CGameApp::Update(void){
 	//キーの更新
 	g_pInput->RefreshKey();
 	//ステージ更新
-	gStage.Update();
+	gStage.Update(gEnemyArray,ENEMY_COUNT);
 
 	//プレイヤーの更新
 	gplayer.Update();
+	//敵更新
+	for (int i = 0; i < ENEMY_COUNT; i++)
+	{
+		gEnemyArray[i].Update();
+	}
 	//デバッグ表示の切り替え
 	if (g_pInput->IsKeyPush(MOFKEY_F1))
 	{
@@ -116,6 +130,11 @@ MofBool CGameApp::Render(void){
 
 	gplayer.Render();
 
+	for (int i = 0; i < ENEMY_COUNT; i++)
+	{
+		gEnemyArray[i].Render();
+	}
+
 	if (gddebug)
 	{
 		CMatrix44 matworld;
@@ -130,7 +149,10 @@ MofBool CGameApp::Render(void){
 		//デバッグ文字
 		gplayer.RenderDebugText();
 		gStage.RenderDebugText();
-
+		for (int i = 0; i < ENEMY_COUNT; i++)
+		{
+			gEnemyArray[i].RenderDebugText(i);
+		}
 	}
 	
 	// 描画の終了
