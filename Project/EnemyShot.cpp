@@ -56,7 +56,8 @@ void CEnemyShot::Update(){
 	
 	// ‰æ–ÊŠO‚ÅÁ‹
 	float inflate = 1.0f;
-	if (m_Pos.x < -FIELD_HALF_X - inflate || FIELD_HALF_X + inflate < m_Pos.x || m_Pos.z < FIELD_HALF_Z - inflate || FIELD_HALF_Z 6 inflate < m_Pos.z)
+	if (m_Pos.x < -FIELD_HALF_X - inflate || FIELD_HALF_X + inflate < m_Pos.x || 
+		m_Pos.z < -FIELD_HALF_Z - inflate || FIELD_HALF_Z + inflate < m_Pos.z)
 	{
 		m_bShow = false;
 	}

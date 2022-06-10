@@ -182,6 +182,27 @@ void CPlayer::CollisionEnamy(CEnemy& ene) {
 }
 
 /**
+ *“G’e‚Æ‚Ì“–‚½‚è”»’è
+ *ˆø”‚Ì“G’e‚É‘Î‚µ‚Ä“–‚½‚è”»’è‚ğÀs‚·‚é
+ * 
+ *ˆø” 
+ *[in]			shot			”»’è‚ğs‚¤“G’e 
+ */
+void CPlayer::CollisionEnemyShot(CEnemyShot& shot) {
+	CSphere ps = GetSphere();
+	if (!shot.GetShow())
+	{
+		return;
+	}
+	CSphere ss = shot.GetSphere();
+	if (ss.CollisionSphere(ps))
+	{
+		m_bDead = true;
+		shot.SetShow(false);
+	}
+}
+
+/**
  *ƒfƒoƒbƒO•`‰æ
  */
 void CPlayer::RenderDebug(void) {

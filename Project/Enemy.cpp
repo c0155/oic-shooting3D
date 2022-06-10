@@ -77,8 +77,10 @@ void CEnemy::Update(CEnemyShot* shot,int smax){
 	m_Pos.y = InterpolationAnim(m_AnimTime, g_EnemyAnimPosY, 2);
 	m_Pos.z = InterpolationAnim(m_AnimTime, g_EnemyAnimPosZ, 5);
 
+	//ƒvƒŒƒCƒ„[‚Æ“¯‚
 	if (g_EnemyAnimPosY[1].Time < m_AnimTime)
 	{
+		//’e”­Ë
 		if (m_ShotWait <= 0)
 		{
 			CEnemyShot* newShot = CEnemyShot::FindAvailableShot(shot, smax);
