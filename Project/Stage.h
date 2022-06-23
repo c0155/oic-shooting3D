@@ -31,4 +31,5 @@ public:
 	void Release();
 	void Initialize(ENEMYSTART* pSt);
 	void Update(CEnemy* ene, int ecnt);
+	bool IsAllEnemy() { return m_EnemyNo >= m_pEnemyStart->Count; }
 };
