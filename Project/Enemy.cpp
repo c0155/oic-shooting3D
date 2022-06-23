@@ -44,6 +44,8 @@ void CEnemy::Initialize(){
 	m_Pos = Vector3(0, 0, 0);
 	m_Rot = Vector3(0, 0, 0);
 	m_bShow = false;
+	m_ShotWait = 0;
+	m_ShotWaitSet = 40;
 	m_AnimTime = 0;
 }
 
@@ -175,6 +177,21 @@ void CEnemy::UpdateBossParts(CEnemyShot* shot, int smax) {
 }
 
 /**
+ *ダメージ処理
+ * 引数分のHPを減らしHPが0以下になれば敵を消去する
+ *
+ * 引数
+ * [in]			dmg			ダメージ
+ */
+void CEnemy::Damage(int dmg) {
+	m_HP -= dmg;
+	if (m_HP <= 0)
+	{
+		m_bShow = false;
+	}
+}
+
+/**
  * 描画
  *
  */
@@ -211,19 +228,4 @@ void CEnemy::RenderDebugText(int i){
 	CGraphicsUtilities::RenderString(10,70 + i * 24,MOF_XRGB(0,0,0),
 		"敵[%d] %s , 位置 X : %.1f , Y : %.1f , Z : %.1f",i + 1,
 		(GetShow() ? "表示" : "非表示"),m_Pos.x,m_Pos.y,m_Pos.z);
-}
-
-/**
- *ダメージ処理
- * 引数分のHPを減らしHPが0以下になれば敵を消去する
- * 
- * 引数
- * [in]			dmg			ダメージ
- */
-void CEnemy::Damage(int dmg) {
-	m_HP -= dmg;
-	if (m_HP <= 0)
-	{
-		m_bShow = false;
-	}
 }

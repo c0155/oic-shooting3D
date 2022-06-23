@@ -168,6 +168,10 @@ void CBoss::Damage(int dmg){
  *
  */
 void CBoss::RotateTarget(){
+	Vector3 direction = m_TargetPos - (m_Pos);
+	float dr = atan2(direction.x, direction.z) + MOF_MATH_PI;
+	float r = fmodf((dr - m_Rot.y) + MOF_MATH_PI, MOF_MATH_2PI);
+	m_Rot.y += ((0 < r) ? r - MOF_MATH_PI : r + MOF_MATH_PI);
 }
 
 /**
@@ -175,6 +179,26 @@ void CBoss::RotateTarget(){
  *
  */
 void CBoss::ShotAllDirShot(CEnemyShot* shot, int smax, int sCnt){
+	if (m_ShotWait > 0)
+	{
+		m_ShotWait--;
+		return;
+	}
+
+	float ad = ((float)rand() / RAND_MAX) * 360.0f / sCnt;
+	for (int cnt = 0; cnt < sCnt; cnt++)
+	{
+		CEnemyShot* newShot = CEnemyShot::FindAvailableShot(shot, smax);
+		if (newShot)
+		{
+			m_ShotWait = 20;
+
+			float rad = MOF_ToRadian(ad);
+			Vector3 vt(cos(rad), 0, sin(rad));
+			newShot->Fire(m_Pos, vt * 0.2f);
+		}
+		ad += 360.0f / sCnt;
+	}
 }
 
 /**
@@ -182,7 +206,23 @@ void CBoss::ShotAllDirShot(CEnemyShot* shot, int smax, int sCnt){
  *
  */
 void CBoss::UpdateParts(int idx, CEnemyShot* shot, int smax, bool bShot){
+	CEnemy& parts = m_Parts[idx];
+	float angle = -(MOF_MATH_2PI * idx / BOSS_PARTS_MAX);
 
+	CVector3 p(0.0f, 3.5f, 0.0f);
+	p.RotationZ(angle);
+	p *= m_matWorld;
+	parts.SetPosition(p);
+
+	CVector3 r(m_Rot);
+	r.z += angle;
+	parts.SetRotation(r);
+
+	if (g_BossAnimPosY[1].Time <= m_AnimTime && bShot)
+	{
+		parts.SetTargetPos(m_TargetPos);
+		parts.Update(shot, smax);
+	}
 }
 
 /**

@@ -12,6 +12,7 @@
 #include	"Player.h"
 #include	"Stage.h"
 #include	"Stage1.h"
+#include	"Boss.h"
 
 CCamera				gcamera;
 CDirectionalLight	glight;
@@ -21,7 +22,10 @@ CEnemy				gEnemyArray[ENEMY_COUNT];
 #define				ENEMYSHOT_COUNT		(200)
 CEnemyShot			gShotArray[ENEMYSHOT_COUNT];
 CMeshContainer		gEnemyShotMesh;
+CBoss				gBoss;
 CStage				gStage;
+bool				gbEnemyDestroyed;
+bool				gbClear = false;
 //デバッグ表示フラグ
 bool				gddebug;
 
@@ -66,6 +70,7 @@ MofBool CGameApp::Initialize(void){
 	{
 		return false;
 	}
+	gBoss.Load();
 
 	//プレイヤーの初期化
 	gplayer.Initialize();
@@ -85,6 +90,7 @@ MofBool CGameApp::Initialize(void){
 		gShotArray[i].Initialize();
 		gShotArray[i].SetMesh(&gEnemyShotMesh);
 	}
+	gBoss.Initialize();
 	
 	return TRUE;
 }
@@ -109,6 +115,9 @@ MofBool CGameApp::Update(void){
 		gEnemyArray[i].SetTargetPos(gplayer.GetPosition());
 		gEnemyArray[i].Update(gShotArray, ENEMYSHOT_COUNT);
 	}
+	//ボス更新
+	gBoss.SetTargetPos(gplayer.GetPosition());
+	gBoss.Update(gShotArray, ENEMYSHOT_COUNT);
 	//敵弾更新
 	for (int i = 0; i < ENEMYSHOT_COUNT; i++)
 	{
@@ -119,10 +128,35 @@ MofBool CGameApp::Update(void){
 	{
 		gplayer.CollisionEnamy(gEnemyArray[i]);
 	}
+	//ボス当たり判定
+	gplayer.CollisionBoss(gBoss);
 	//敵弾当たり判定
 	for (int i = 0; i < ENEMYSHOT_COUNT; i++)
 	{
 		gplayer.CollisionEnemyShot(gShotArray[i]);
+	}
+	//雑魚全滅判定
+	if (!gbEnemyDestroyed && gStage.IsAllEnemy())
+	{
+		bool btmp = true;
+		for (int i = 0; i < ENEMY_COUNT; i++)
+		{
+			if (gEnemyArray[i].GetShow())
+			{
+				btmp = false;
+			}
+		}
+		gbEnemyDestroyed = btmp;
+		if (gbEnemyDestroyed)
+		{
+			gBoss.Start();
+			gBoss.SetTargetPos(gplayer.GetPosition());
+			gBoss.Update(gShotArray, ENEMY_COUNT);
+		}
+	}
+	if (!gbClear && gbEnemyDestroyed && !gBoss.GetShow())
+	{
+		gbClear = true;
 	}
 	//デバッグ表示の切り替え
 	if (g_pInput->IsKeyPush(MOFKEY_F1))
@@ -130,8 +164,10 @@ MofBool CGameApp::Update(void){
 		gddebug = ((gddebug) ? false : true);
 	}
 	//ゲームオーバー表示後初期化
-	if (g_pInput->IsKeyPush(MOFKEY_RETURN) && gplayer.IsDead())
+	if (g_pInput->IsKeyPush(MOFKEY_RETURN) && ( gplayer.IsDead() || gbClear))
 	{
+		gbEnemyDestroyed = false;
+		gbClear = false;
 		//オブジェクト初期化
 		gplayer.Initialize();
 		gStage.Initialize(&gStg1EnemyStart);
@@ -143,6 +179,7 @@ MofBool CGameApp::Update(void){
 		{
 			gShotArray[i].Initialize();
 		}
+		gBoss.Initialize();
 	}
 	//プレイヤーの動きに合わせてカメラを動かす
 	float posx = gplayer.GetPosition().x * 0.4f;
@@ -180,6 +217,8 @@ MofBool CGameApp::Render(void){
 	{
 		gEnemyArray[i].Render();
 	}
+	//ボス描画
+	gBoss.Render();
 	//敵弾描画
 	for (int i = 0; i < ENEMY_COUNT; i++)
 	{
@@ -194,6 +233,9 @@ MofBool CGameApp::Render(void){
 		{
 			gEnemyArray[i].RenderDebug();
 		}
+		//ボスデバッグ
+		gBoss.RenderDebug();
+		
 		//敵弾デバッグ
 		for (int i = 0; i < ENEMYSHOT_COUNT; i++)
 		{
@@ -210,8 +252,8 @@ MofBool CGameApp::Render(void){
 	if (gddebug)
 	{
 		//デバッグ文字
-		gplayer.RenderDebugText();
 		gStage.RenderDebugText();
+		gplayer.RenderDebugText();
 		for (int i = 0; i < ENEMY_COUNT; i++)
 		{
 			gEnemyArray[i].RenderDebugText(i);
@@ -221,6 +263,10 @@ MofBool CGameApp::Render(void){
 	if (gplayer.IsDead())
 	{
 		CGraphicsUtilities::RenderString(240, 350, MOF_COLOR_RED, "ゲームオーバー : Enterキーでもう一度最初から");
+	}
+	else if(gbClear)
+	{
+		CGraphicsUtilities::RenderString(240, 350, MOF_COLOR_RED, "ゲームクリア　：　Enterキーでもう一度最初から");
 	}
 	
 	// 描画の終了
@@ -238,5 +284,6 @@ MofBool CGameApp::Release(void){
 	gplayer.Release();
 	gStage.Release();
 	gEnemyShotMesh.Release();
+	gBoss.Release();
 	return TRUE;
 }

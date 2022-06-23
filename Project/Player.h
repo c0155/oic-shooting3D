@@ -3,6 +3,7 @@
 #include "GameDefine.h"
 #include "PlayerShot.h"
 #include "Enemy.h"
+#include "Boss.h"
 
 // ˆÚ“®‘¬“x
 #define PLAYER_SPEED		(0.1f)
@@ -36,5 +37,6 @@ public:
 	void CollisionEnamy(CEnemy& ene);
 	bool IsDead() { return m_bDead; }
 	void CollisionEnemyShot(CEnemyShot& shot);
+	void CollisionBoss(CBoss& boss);
 	void Release();
 };
