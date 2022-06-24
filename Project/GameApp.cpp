@@ -220,7 +220,7 @@ MofBool CGameApp::Render(void){
 	//ƒ{ƒX•`‰æ
 	gBoss.Render();
 	//“G’e•`‰æ
-	for (int i = 0; i < ENEMY_COUNT; i++)
+	for (int i = 0; i < ENEMYSHOT_COUNT; i++)
 	{
 		gShotArray[i].Render();
 	}
